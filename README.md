@@ -2,11 +2,11 @@
 
 ## Fast and simple NodeJS caching library with distributed invalidation policy
 
-A simple caching module that provide you an ability to cache and invalidate your data. This module have some differences from others caching modules:
+A simple caching module that provides you an ability to cache and invalidate your data. This module has some differences from others caching modules:
 
-- It keeps data only in memory (without serialization/deserialization) - this why it's fast.
-- It has strict invalidation policy witch allow user to easily invalidate cached data using something like groups.
-- Distributed storage will work fast even on slow connection because we not transfer unnecessary data.
+- It keeps data in memory only (without serialization/deserialization) - this why it's so fast.
+- It has strict invalidation policy witch allows user to invalidate cached data easily using something like groups.
+- Distributed storage will work fast even on slow connection, because we don't transfer unnecessary data.
 
 ## Install
 
@@ -68,11 +68,11 @@ async deleteManufacturer(id) {
 
 - `options` (Object)
     - `ttl` (Number) is a default time to live for all `.set()` calls in milliseconds. `Infinity` by default.
-    - `manager` (String|ValidityManager) is a ValidityManager instance or one predefined "InMemory" or "Redis". `InMemory` by default.
+    - `manager` (String|ValidityManager) is a [ValidityManager](#validitymanager) instance or one predefined "InMemory" or "Redis". `InMemory` by default.
     - `managerOptions` (Object) is currently necessary only for "Redis" manager.
         - `redisClient` ([redis client](https://www.npmjs.com/package/redis)).
         - `prefix` (String) is a prefix for all keys in redis.
-        - `ttl` (Number) is a default time to live for all redis keys in milliseconds. 7 days by default. This options is necessary to not clog up redis.
+        - `ttl` (Number) is a default time to live for all redis keys in milliseconds. 7 days (`7 * 24 * 60 * 60 * 1000`) by default. This option is necessary to not clog up redis.
 
 ### `await cache.set(keyParts, value, ttl)`
 
@@ -112,4 +112,5 @@ ValidityManager is an interface witch have two methods `async sign(keyParts)` an
 
 ## Notes
 
-* _mahsan_ (מחסן) is a storage in Hebrew.
+- _`value`_ argument always stored by reference. Don't modify it after setting/getting from cache.
+- _mahsan_ (מחסן) is a storage in Hebrew.
