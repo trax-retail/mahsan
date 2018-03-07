@@ -1,5 +1,9 @@
 # mahsan
 
+[![Build Status](https://travis-ci.org/Trax-retail/mahsan.svg?branch=master)](https://travis-ci.org/Trax-retail/mahsan) [![NPM version](https://badge.fury.io/js/mahsan.svg)](http://badge.fury.io/js/mahsan)
+
+[![NPM](https://nodei.co/npm/mahsan.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/mahsan/)
+
 ## Fast and simple NodeJS caching library with distributed invalidation policy
 
 A simple caching module that provides you an ability to cache and invalidate your data. This module has some differences from others caching modules:
