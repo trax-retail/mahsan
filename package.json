@@ -29,7 +29,8 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "nyc --reporter text --reporter html mocha --recursive test"
+    "test": "nyc --reporter text --reporter html mocha --recursive test",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "Kirill Efimov <kirill89@gmail.com>",
   "license": "MIT",
@@ -38,6 +39,7 @@
     "url": "git://github.com/Trax-retail/mahsan.git"
   },
   "devDependencies": {
+    "coveralls": "^3.0.0",
     "eslint": "^4.18.2",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.9.0",
