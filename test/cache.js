@@ -3,38 +3,129 @@
 const assert = require('assert');
 const Cache = require('../');
 
+async function wait(delay) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
 describe('Cache', () => {
-  it('.get() should return undefined if no value was stored', async() => {
-    const cache = new Cache();
+    it('.get() should return undefined if no value was stored', async () => {
+        const cache = new Cache();
 
-    assert.deepStrictEqual(await cache.get('test'), undefined);
-  });
+        assert.deepStrictEqual(await cache.get('test'), undefined);
+    });
 
-  it('.get() should return previously stored value', async() => {
-    const cache = new Cache();
+    it('.get() should return previously stored value', async () => {
+        const cache = new Cache();
 
-    await cache.set(['a', 'b', 'c'], {foo: 'bar'});
-    assert.deepStrictEqual(await cache.get(['a', 'c', 'b']), {foo: 'bar'});
-  });
+        await cache.set(['a', 'b', 'c'], {foo: 'bar'});
 
-  it('.invalidate() should invalidate all cache records related to key part', async() => {
-    const cache = new Cache();
+        assert.deepStrictEqual(await cache.get(['a', 'c', 'b']), {foo: 'bar'});
+    });
 
-    await cache.set(['a', 'b', 'c'], {foo: 'bar'});
-    await cache.set(['b', 'c', 'd'], {foo: 'baz'});
-    await cache.set(['c', 'd', 'e'], {foo: 'qux'});
-    await cache.invalidate(['a', 'b']);
+    it('.invalidate() should invalidate all cache records related to key part', async () => {
+        const cache = new Cache();
 
-    assert.deepStrictEqual(await cache.get(['a', 'b', 'c']), undefined);
-    assert.deepStrictEqual(await cache.get(['b', 'c', 'd']), undefined);
-    assert.deepStrictEqual(await cache.get(['c', 'd', 'e']), {foo: 'qux'});
-  });
+        await cache.set(['a', 'b', 'c'], {foo: 'bar'});
+        await cache.set(['b', 'c', 'd'], {foo: 'baz'});
+        await cache.set(['c', 'd', 'e'], {foo: 'qux'});
+        await cache.invalidate(['a', 'b']);
 
-  it('.delete() should delete stored value', async() => {
-    const cache = new Cache();
+        assert.deepStrictEqual(await cache.get(['a', 'b', 'c']), undefined);
+        assert.deepStrictEqual(await cache.get(['b', 'c', 'd']), undefined);
+        assert.deepStrictEqual(await cache.get(['c', 'd', 'e']), {foo: 'qux'});
+    });
 
-    await cache.set(['a', 'b', 'c'], {foo: 'bar'});
-    await cache.delete(['a', 'b', 'c'], {foo: 'bar'});
-    assert.deepStrictEqual(await cache.get(['a', 'c', 'b']), undefined);
-  });
+    it('.delete() should delete stored value', async () => {
+        const cache = new Cache();
+
+        await cache.set(['a', 'b', 'c'], {foo: 'bar'});
+        await cache.delete(['a', 'b', 'c']);
+
+        assert.deepStrictEqual(await cache.get(['a', 'c', 'b']), undefined);
+    });
+
+    it('.has() should work correctly', async () => {
+        const cache = new Cache();
+
+        await cache.set('a', {foo: 'bar'});
+        await cache.set('b', {foo: 'baz'});
+        await cache.set('c', {foo: 'qux'});
+        await cache.delete('b');
+
+        assert.deepStrictEqual(await cache.get('a'), {foo: 'bar'});
+        assert.deepStrictEqual(await cache.get('b'), undefined);
+        assert.deepStrictEqual(await cache.get('c'), {foo: 'qux'});
+    });
+
+    it('.set() with ttl should invalidate old values', async () => {
+        const cache = new Cache({ttl: 400});
+
+        await cache.set('a', {foo: 'bar'}, 100);
+        await cache.set('b', {foo: 'baz'}, 300);
+        await cache.set('c', {foo: 'qux'}, 200);
+        await cache.set('d', {foo: 'quux'}, -1); // With wrong ttl.
+
+        assert.deepStrictEqual(await cache.get('a'), {foo: 'bar'});
+        assert.deepStrictEqual(await cache.get('b'), {foo: 'baz'});
+        assert.deepStrictEqual(await cache.get('c'), {foo: 'qux'});
+        assert.deepStrictEqual(await cache.get('d'), {foo: 'quux'});
+
+        await wait(101);
+
+        assert.deepStrictEqual(await cache.get('a'), undefined);
+        assert.deepStrictEqual(await cache.get('b'), {foo: 'baz'});
+        assert.deepStrictEqual(await cache.get('c'), {foo: 'qux'});
+        assert.deepStrictEqual(await cache.get('d'), {foo: 'quux'});
+
+        await wait(100);
+
+        assert.deepStrictEqual(await cache.get('a'), undefined);
+        assert.deepStrictEqual(await cache.get('b'), {foo: 'baz'});
+        assert.deepStrictEqual(await cache.get('c'), undefined);
+        assert.deepStrictEqual(await cache.get('d'), {foo: 'quux'});
+
+        await wait(100);
+
+        assert.deepStrictEqual(await cache.get('a'), undefined);
+        assert.deepStrictEqual(await cache.get('b'), undefined);
+        assert.deepStrictEqual(await cache.get('c'), undefined);
+        assert.deepStrictEqual(await cache.get('d'), {foo: 'quux'});
+
+        await wait(100);
+
+        assert.deepStrictEqual(await cache.get('a'), undefined);
+        assert.deepStrictEqual(await cache.get('b'), undefined);
+        assert.deepStrictEqual(await cache.get('c'), undefined);
+        assert.deepStrictEqual(await cache.get('d'), undefined);
+    });
+
+    it('.set() should overwrite old values', async () => {
+        const cache = new Cache();
+
+        await cache.set('a', 'c');
+
+        assert.deepStrictEqual(await cache.get('a'), 'c');
+
+        await cache.set('a', 'd');
+
+        assert.deepStrictEqual(await cache.get('a'), 'd');
+    });
+
+    it('should work with custom manager', async () => {
+        function CustomValidityManager() {
+            this.sign = (keyParts) => {
+                assert.deepStrictEqual(keyParts, ['a', 'b', 'c']);
+                return 'foo';
+            };
+
+            this.update = (keyParts) => {
+                assert.deepStrictEqual(keyParts, ['a', 'c']);
+            };
+        }
+
+        const cache = new Cache({manager: CustomValidityManager});
+
+        await cache.set(['b', 'c', 'a'], 'test');
+        await cache.invalidate(['a', 'c']);
+    });
 });
