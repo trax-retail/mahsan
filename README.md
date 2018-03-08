@@ -72,6 +72,7 @@ async deleteManufacturer(id) {
 
 - `options` (Object)
     - `ttl` (Number) is a default time to live for all `.set()` calls in milliseconds. `Infinity` by default.
+    - `checkPeriod` (Number) is a period in milliseconds, used for deleting expired data. 5 min (`5 * 60 * 1000`) by default.
     - `manager` (String|ValidityManager) is a [ValidityManager](#validitymanager) instance or one predefined "InMemory" or "Redis". `InMemory` by default.
     - `managerOptions` (Object) is currently necessary only for "Redis" manager.
         - `redisClient` ([redis client](https://www.npmjs.com/package/redis)).
