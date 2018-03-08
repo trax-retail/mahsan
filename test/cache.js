@@ -63,7 +63,7 @@ describe('Cache', () => {
         await cache.set('a', {foo: 'bar'}, 100);
         await cache.set('b', {foo: 'baz'}, 300);
         await cache.set('c', {foo: 'qux'}, 200);
-        await cache.set('d', {foo: 'quux'}, -1); // With wrong ttl.
+        await cache.set('d', {foo: 'quux'}, -1); // With wrong ttl = 400 by default.
 
         assert.deepStrictEqual(await cache.get('a'), {foo: 'bar'});
         assert.deepStrictEqual(await cache.get('b'), {foo: 'baz'});
@@ -127,5 +127,23 @@ describe('Cache', () => {
 
         await cache.set(['b', 'c', 'a'], 'test');
         await cache.invalidate(['a', 'c']);
+    });
+
+    it('should cleanup old data', async () => {
+        const cache = new Cache({checkPeriod: 10});
+
+        await cache.set('a', {foo: 'bar'}, 100);
+        await cache.set('b', {foo: 'baz'}, 200);
+        await cache.set('c', {foo: 'qux'});
+
+        assert.deepStrictEqual(cache._storage.size, 3);
+
+        await wait(111);
+
+        assert.deepStrictEqual(cache._storage.size, 2);
+
+        await wait(110);
+
+        assert.deepStrictEqual(cache._storage.size, 1);
     });
 });

@@ -75,4 +75,40 @@ describe('RedisValidityManager', () => {
         assert.deepStrictEqual(await cache.get(['b', 'c', 'd']), undefined);
         assert.deepStrictEqual(await cache.get(['c', 'd', 'e']), {foo: 'qux'});
     });
+
+    it('.sign() should re throw error from redis', async () => {
+        const redisMockClient = {
+            mget(_, callback) {
+                callback(new Error('redis internal error'));
+            }
+        };
+        const manager = new RedisValidityManager({redisClient: redisMockClient});
+
+        try {
+            await manager.sign(['a', 'b']);
+        } catch (err) {
+            assert.ok(/redis internal error/.test(err));
+        }
+    });
+
+    it('.update() should re throw error from redis', async () => {
+        const redisMockClient = {
+            multi() {
+                return {
+                    set() {
+                    },
+                    exec(callback) {
+                        callback(new Error('redis internal error'));
+                    }
+                };
+            }
+        };
+        const manager = new RedisValidityManager({redisClient: redisMockClient});
+
+        try {
+            await manager.update(['a', 'b']);
+        } catch (err) {
+            assert.ok(/redis internal error/.test(err));
+        }
+    });
 });
