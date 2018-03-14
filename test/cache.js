@@ -44,6 +44,20 @@ describe('Cache', () => {
         assert.deepStrictEqual(await cache.get(['a', 'c', 'b']), undefined);
     });
 
+    it('.clear() should clear local cache storage', async () => {
+        const cache = new Cache();
+
+        await cache.set('a', 1);
+        await cache.set('b', 2);
+        await cache.set('c', 3);
+
+        assert.deepStrictEqual(cache._storage.size, 3);
+
+        cache.clear();
+
+        assert.deepStrictEqual(cache._storage.size, 0);
+    });
+
     it('.has() should work correctly', async () => {
         const cache = new Cache();
 

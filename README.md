@@ -105,6 +105,10 @@ Delete a value from the cache (on this NodeJS instance).
 
 - `keyParts` (String|Array) is a list of keys used to retrieve a value previously saved with `cache.set()` on this NodeJS instance.
 
+### `cache.clear()`
+
+Clear cache on this NodeJS instance.
+
 ### `await cache.invalidate(keyParts)`
 
 Make keys invalid globally (for all NodeJS instances in case of redis).
