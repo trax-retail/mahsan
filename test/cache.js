@@ -22,6 +22,26 @@ describe('Cache', () => {
         assert.deepStrictEqual(await cache.get(['a', 'c', 'b']), {foo: 'bar'});
     });
 
+    it('.get() should return undefined if cache was cleared in the middle of .has()', async () => {
+        function CustomValidityManager() {
+            this.sign = async () => {
+                await wait(100);
+                return 'foo';
+            };
+
+            this.update = () => {};
+        }
+
+        const cache = new Cache({manager: CustomValidityManager});
+
+        await cache.set('a', 'b');
+
+        const promise = cache.get('a');
+
+        cache.clear();
+        assert.deepStrictEqual(await promise, undefined);
+    });
+
     it('.invalidate() should invalidate all cache records related to key part', async () => {
         const cache = new Cache();
 
