@@ -6,11 +6,11 @@
 
 ## Fast and simple NodeJS caching library with distributed invalidation policy
 
-A simple caching module that provides you an ability to cache and invalidate your data. This module has some differences from others caching modules:
+A simple caching module that provides an ability to cache and invalidate your data. Unlike other modules, Mahsan supports the following features:
 
-- It keeps data in memory only (without serialization/deserialization) - this why it's so fast.
-- It has strict invalidation policy witch allows user to invalidate cached data easily using something like groups.
-- Distributed storage will work fast even on slow connection, because we don't transfer unnecessary data.
+- Data is stored only in memory (without serialization/deserialization) - this why it's so fast.
+- It has a strict invalidation policy which allows clients to invalidate cached entities easily.
+- We optimize data transfer to the distributed storage in order to remain performant even on slow connections.
 
 ## Install
 
@@ -26,42 +26,42 @@ const cache = new Cache();
 
 async getProducts() {
     // Try get data from cache.
-    const data = await cache.get(['product', 'manufacturer']);
+    const data = await cache.get(['courses', 'lecturers']);
 
     if (data) return data;
 
-    const dbResult = await sql(`SELECT p.name AS name, m.name AS manufacturer
-                                FROM product AS p
-                                LEFT JOIN manufacturer AS m ON m.id = p.manufacturer_id;`);
+    const dbResult = await sql(`SELECT c.name AS name, l.name AS lecturer
+                                FROM course AS c
+                                LEFT JOIN lecturer AS l ON l.id = c.lecturer_id;`);
 
-    // Save all products names and related manufacturers names in cache (in current NodeJs instance).
-    await cache.set(['product', 'manufacturer'], dbResult);
+    // Save all courses names and related lecturers names in cache (in current NodeJs instance).
+    await cache.set(['courses', 'lecturers'], dbResult);
     return dbResult;
 }
 
-async getManufacturers() {
+async getLecturers() {
     // Try get data from cache.
-    const data = await cache.get(['manufacturer']);
+    const data = await cache.get(['lecturers']);
 
     if (data) return data;
 
-    const dbResult = await sql(`SELECT * FROM manufacturer;`);
+    const dbResult = await sql(`SELECT * FROM lecturers;`);
 
-    // Save all manufacturers in cache (in current NodeJs instance).
-    await cache.set(['manufacturer'], dbResult);
+    // Save all lecturers in cache (in current NodeJs instance).
+    await cache.set(['lecturers'], dbResult);
     return dbResult;
 }
 
-async deleteProduct(id) {
-    await sql(`DELETE FROM product WHERE id = ?;`, [id]);
-    // Invalidate cache for "getProducts()" function.
+async deleteCourse(id) {
+    await sql(`DELETE FROM courses WHERE id = ?;`, [id]);
+    // Invalidate cache for "getCourses()" function.
     await cache.invalidate('product');
 }
 
-async deleteManufacturer(id) {
-    await sql(`DELETE FROM manufacturer WHERE id = ?;`, [id]);
-    // Invalidate cache for both "getProducts()" and "getManufacturers()" function.
-    await cache.invalidate('manufacturer');
+async deleteLecturer(id) {
+    await sql(`DELETE FROM lecturers WHERE id = ?;`, [id]);
+    // Invalidate cache for both "getCourses()" and "getLecturers()" function.
+    await cache.invalidate('lecturers');
 }
 
 ```
@@ -76,8 +76,8 @@ async deleteManufacturer(id) {
     - `manager` (String|ValidityManager) is a [ValidityManager](#validitymanager) instance or one predefined "InMemory" or "Redis". `InMemory` by default.
     - `managerOptions` (Object) is currently necessary only for "Redis" manager.
         - `redisClient` ([redis client](https://www.npmjs.com/package/redis)).
-        - `prefix` (String) is a prefix for all keys in redis.
-        - `ttl` (Number) is a default time to live for all redis keys in milliseconds. 7 days (`7 * 24 * 60 * 60 * 1000`) by default. This option is necessary to not clog up redis.
+        - `prefix` (String) is a prefix for all keys in Redis.
+        - `ttl` (Number) is a default time to live for all Redis keys in milliseconds. 7 days (`7 * 24 * 60 * 60 * 1000`) by default. This option is necessary in order not to clog up Redis.
 
 ### `await cache.set(keyParts, value, ttl)`
 
@@ -111,13 +111,13 @@ Clear cache on this NodeJS instance.
 
 ### `await cache.invalidate(keyParts)`
 
-Make keys invalid globally (for all NodeJS instances in case of redis).
+Invalidate keys locally (in case of Node.JS instance) or globally (in case of Redis).
 
 - `keyParts` (String|Array) is a list of keys used to retrieve a value.
 
 ### ValidityManager
 
-ValidityManager is an interface witch have two methods `async sign(keyParts)` and `async update(keyParts)`. You need your own implementation of ValidityManager only if you need custom shared storage (like MongoDB).
+ValidityManager is an interface which has two methods `async sign(keyParts)` and `async update(keyParts)`. ValidityManager may be override (for example, with an own implementation of a custom shared storage).
 
 ## Notes
 
