@@ -24,7 +24,7 @@ A simple caching module that provides an ability to cache and invalidate your da
 const Cache = require('mahsan');
 const cache = new Cache();
 
-async getProducts() {
+async getCourses() {
     // Try get data from cache.
     const data = await cache.get(['courses', 'lecturers']);
 
@@ -55,7 +55,7 @@ async getLecturers() {
 async deleteCourse(id) {
     await sql(`DELETE FROM courses WHERE id = ?;`, [id]);
     // Invalidate cache for "getCourses()" function.
-    await cache.invalidate('product');
+    await cache.invalidate('courses');
 }
 
 async deleteLecturer(id) {
