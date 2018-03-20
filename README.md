@@ -20,6 +20,23 @@ A simple caching module that provides an ability to cache and invalidate your da
 
 ## Example
 
+### Simple
+
+```js
+// Init
+const Cache = require('mahsan');
+const cache = new Cache();
+
+// ... do something ...
+await cache.set('myKey', {foo: 'bar'});
+// ... do something ...
+const data = await cache.get('myKey');
+console.log(data); // {foo: 'bar'}
+
+```
+
+### Complex
+
 ```js
 const Cache = require('mahsan');
 const cache = new Cache();
@@ -31,8 +48,8 @@ async getCourses() {
     if (data) return data;
 
     const dbResult = await sql(`SELECT c.name AS name, l.name AS lecturer
-                                FROM course AS c
-                                LEFT JOIN lecturer AS l ON l.id = c.lecturer_id;`);
+                                FROM courses AS c
+                                LEFT JOIN lecturers AS l ON l.id = c.lecturer_id;`);
 
     // Save all courses names and related lecturers names in cache (in current NodeJs instance).
     await cache.set(['courses', 'lecturers'], dbResult);
