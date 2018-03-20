@@ -1,6 +1,6 @@
 {
   "name": "mahsan",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A simple caching module that provides you an ability to cache and invalidate your data.",
   "main": "index.js",
   "keywords": [
@@ -40,13 +40,13 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.0",
-    "eslint": "^4.18.2",
+    "eslint": "^4.19.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.0.1",
-    "mocha": "^5.0.2",
+    "mocha": "^5.0.4",
     "nyc": "^11.6.0",
     "redis": "^2.8.0"
   },
