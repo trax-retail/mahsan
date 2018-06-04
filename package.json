@@ -1,6 +1,6 @@
 {
   "name": "mahsan",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A simple caching module that provides you an ability to cache and invalidate your data.",
   "main": "index.js",
   "keywords": [
