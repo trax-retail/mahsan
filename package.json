@@ -39,7 +39,7 @@
     "url": "git://github.com/Trax-retail/mahsan.git"
   },
   "devDependencies": {
-    "coveralls": "^3.0.0",
+    "coveralls": "^3.0.9",
     "eslint": "^5.0.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.9.0",
